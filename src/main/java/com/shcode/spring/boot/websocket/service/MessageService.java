@@ -1,5 +1,6 @@
 package com.shcode.spring.boot.websocket.service;
 
+import com.shcode.spring.boot.websocket.model.Message;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -17,7 +18,7 @@ public class MessageService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private static final String SIMP_SESSION_ID = "simpSessionId";
     private static final String WS_MESSAGE_TRANSFER_DESTINATION = "/topic/public";
-    private List<String> userNames = new ArrayList<>();
+    private Set<String> userNames = new HashSet<>();
 
     /**
      * Handles WebSocket connection events
@@ -42,11 +43,14 @@ public class MessageService {
     }
 
     public void sendMessages(String message) {
-        System.out.println("usernames = "+userNames);
+        System.out.println("scheduler");
         for (String userName : userNames) {
-            if (userName.equalsIgnoreCase("Har7sh")) {
-                System.out.println("username = "+userName);
-                simpMessagingTemplate.convertAndSendToUser(userName, WS_MESSAGE_TRANSFER_DESTINATION,message);
+            Message msg = new Message();
+            msg.setSender(userName);
+            msg.setContent((message + userName + "." + " Current timestamp: "+new Date()));
+            msg.setType(Message.MessageType.CHAT);
+            if (userName.equalsIgnoreCase("user1") || userName.equalsIgnoreCase("user2")) {
+                simpMessagingTemplate.convertAndSendToUser(userName, WS_MESSAGE_TRANSFER_DESTINATION, msg);
             }
         }
     }
